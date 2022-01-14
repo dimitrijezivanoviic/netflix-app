@@ -61,3 +61,38 @@
 .profileScreen__info > img {
   height: 100px;
 }
+
+@media only screen and (max-width: 425px) {
+  .profileScreen__body > h1 {
+    font-size: 2.5rem;
+  }
+
+  .profileScreen__body {
+    padding-top: 25%;
+    width: 90%;
+  }
+
+  .profileScreen__details {
+    margin-left: 0px;
+  }
+
+  .profileScreen__info > img {
+    height: 50px;
+    margin-right: 10px;
+  }
+
+  .plansScreen__plan {
+    padding-left: 0px;
+    padding-right: 0px;
+  }
+}
+
+@media only screen and (max-width: 320px) {
+  .profileScreen__info {
+    display: block;
+  }
+
+  .profileScreen {
+    height: 100%;
+  }
+}

@@ -50,3 +50,9 @@
   cursor: pointer;
   text-decoration: underline;
 }
+
+@media only screen and (max-width: 425px) {
+  .signupScreen {
+    padding: 50px;
+  }
+}

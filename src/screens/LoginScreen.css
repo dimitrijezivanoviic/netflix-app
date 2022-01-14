@@ -90,3 +90,30 @@
   font-weight: 600;
   cursor: pointer;
 }
+
+@media only screen and (max-width: 425px) {
+  .loginScreen__body > h1 {
+    font-size: 1.75rem;
+    margin-top: 10%;
+  }
+
+  .loginScreen__body > h2 {
+    font-size: 1.125rem;
+  }
+
+  .loginScreen__body {
+    top: 20%;
+  }
+
+  .loginScreen__logo {
+    width: 120px;
+  }
+
+  .loginSreen__button {
+    padding: 7px 15px;
+  }
+
+  .loginScreen__getStarted {
+    padding: 10px 15px;
+  }
+}
