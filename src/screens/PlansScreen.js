@@ -1,44 +1,53 @@
 import React, { useEffect, useState } from "react";
-import {
-  collection,
-  getDocs,
-  doc,
-  updateDoc,
-  addDoc,
-} from "firebase/firestore";
 import { useSelector } from "react-redux";
 import { selectUser } from "../features/userSlice";
 import { loadStripe } from "@stripe/stripe-js";
-import { db } from "../firebase";
+import db from "../firebase";
 import { useNavigate } from "react-router-dom";
 import "./PlansScreen.css";
 
 function PlansScreen() {
   const [products, setProducts] = useState([]);
+  const [subscription, setSubscription] = useState(null);
   const user = useSelector(selectUser);
-
   const navigate = useNavigate();
 
   useEffect(() => {
-    //get data from firebase v9
-    const colRef = collection(db, "products");
-    getDocs(colRef).then((querySnapshot) => {
-      const products = {};
-      querySnapshot.docs.forEach(async (productDoc) => {
-        products[productDoc.id] = productDoc.data();
-        const priceSnap = await getDocs(collection(productDoc.ref, "prices"));
-        priceSnap.docs.forEach((price) => {
-          products[productDoc.id].prices = {
-            priceId: price.id,
-            priceData: price.data(),
-          };
+    db.collection("customers")
+      .doc(user.uid)
+      .collection("subscriptions")
+      .get()
+      .then((querySnapshot) => {
+        querySnapshot.forEach(async (subscription) => {
+          setSubscription({
+            role: subscription.data().role,
+            current_period_end: subscription.data().current_period_end.secconds,
+          });
         });
       });
-      setProducts(products);
-    });
+  }, [user.uid]);
+
+  useEffect(() => {
+    db.collection("products")
+      .get()
+      .then((querySnapshot) => {
+        const products = {};
+        querySnapshot.forEach(async (productDoc) => {
+          products[productDoc.id] = productDoc.data();
+          const priceSnap = await productDoc.ref.collection("prices").get();
+          priceSnap.docs.forEach((price) => {
+            products[productDoc.id].prices = {
+              priceId: price.id,
+              priceData: price.data(),
+            };
+          });
+        });
+        setProducts(products);
+      });
   }, []);
 
   console.log(products);
+  console.log(subscription);
 
   const homePageHandler = () => {
     alert("Thank you for subscription!");
@@ -46,22 +55,15 @@ function PlansScreen() {
   };
 
   const loadCheckout = async (priceId) => {
-    const data = {
-      price: priceId,
-      success_url: window.location.origin,
-      cancel_url: window.location.origin,
-    };
-
-    const docRef = await addDoc(collection(db, "customers"), data);
-    // const docRef = await db
-    //   .collection("customers")
-    //   .doc(user.uid)
-    //   .collection("checkout_sessions")
-    //   .add({
-    //     price: priceId,
-    //     success_url: window.location.origin,
-    //     cancel_url: window.location.origin,
-    //   });
+    const docRef = await db
+      .collection("customers")
+      .doc(user.uid)
+      .collection("checkout_sessions")
+      .add({
+        price: priceId,
+        success_url: window.location.origin,
+        cancel_url: window.location.origin,
+      });
 
     docRef.onSnapshot(async (snap) => {
       const { error, sessionId } = snap.data();
@@ -83,14 +85,27 @@ function PlansScreen() {
     <div className="plansScreen">
       {Object.entries(products).map(([productId, productData]) => {
         //if users subscription is active
+
+        const isCurrentPackage = productData.name
+          ?.toLowerCase()
+          .includes(subscription?.role);
         return (
-          <div className="plansScreen__plan" key={productId}>
+          <div
+            className={`${
+              isCurrentPackage && "plansScreen__plan--disabled"
+            } plansScreen__plan`}
+            key={productId}
+          >
             <div className="plansScreen__info">
               <h5>{productData.name}</h5>
               <h6>{productData.description}</h6>
             </div>
-            <button className="plansScreen__plan" onClick={homePageHandler}>
-              Subscribe
+            <button
+              onClick={() =>
+                !isCurrentPackage && loadCheckout(productData.prices.priceId)
+              }
+            >
+              {isCurrentPackage ? "Current Package" : "Subscribe"}
             </button>
           </div>
         );

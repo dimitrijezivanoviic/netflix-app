@@ -1,9 +1,5 @@
 import React, { useState, useRef } from "react";
 import { auth } from "../firebase";
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-} from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import "./SignUpScreen.css";
 
@@ -17,33 +13,32 @@ function SignUpScreen({ formUp }) {
 
   const register = async (e) => {
     e.preventDefault();
-    try {
-      const user = await createUserWithEmailAndPassword(
-        auth,
+    auth
+      .createUserWithEmailAndPassword(
         emailRef.current.value,
         passwordRef.current.value
-      );
-      alert("Successfull registration.");
-      navigate("/profile");
-      console.log(user);
-    } catch (error) {
-      alert(error.message);
-    }
+      )
+      .then((authUser) => {
+        alert("Successfull registration");
+        navigate("/profile");
+      })
+      .catch((error) => {
+        alert(error.message);
+      });
   };
 
   const signIn = async (e) => {
     e.preventDefault();
-    try {
-      const user = await signInWithEmailAndPassword(
-        auth,
+    auth
+      .signInWithEmailAndPassword(
         emailRef.current.value,
         passwordRef.current.value
-      );
-      alert("Successfull login.");
-      navigate("/");
-    } catch (error) {
-      alert(error.message);
-    }
+      )
+      .then((authUser) => {
+        alert("Successfull login");
+        navigate("/");
+      })
+      .catch((error) => alert(error.message));
   };
 
   const signInJSX = (
