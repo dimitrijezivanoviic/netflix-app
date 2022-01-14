@@ -4,10 +4,13 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
 } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
 import "./SignUpScreen.css";
 
 function SignUpScreen({ formUp }) {
   const [signUpForm, setSignUpForm] = useState(false);
+
+  const navigate = useNavigate();
 
   const emailRef = useRef();
   const passwordRef = useRef();
@@ -21,6 +24,7 @@ function SignUpScreen({ formUp }) {
         passwordRef.current.value
       );
       alert("Successfull registration.");
+      navigate("/profile");
       console.log(user);
     } catch (error) {
       alert(error.message);
@@ -36,7 +40,7 @@ function SignUpScreen({ formUp }) {
         passwordRef.current.value
       );
       alert("Successfull login.");
-      console.log(user);
+      navigate("/");
     } catch (error) {
       alert(error.message);
     }
